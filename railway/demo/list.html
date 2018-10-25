@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0"
+          name="viewport">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <title>list</title>
+    <style type="text/css">
+        .clearfix:after {
+            content: "";
+            height: 0;
+            font-size: 0;
+            visibility: hidden;
+            display: block;
+            clear: both;
+        }
+
+        .clearfix {
+            zoom: 1;
+        }
+
+        .fl {
+            float: left;
+        }
+
+        p {
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+列表页
+<button onclick="go()">详情</button>
+<script>
+
+	function go() {
+		window.location.href = 'detail.html';
+	}
+
+	function setCookie(cname, cvalue, exdays) {
+		var d = new Date();
+		d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+		var expires = "expires=" + d.toUTCString();
+		document.cookie = cname + "=" + cvalue + "; " + expires;
+	}
+
+	//==============获取cookie=====================
+	function getCookie(cname) {
+		var name = cname + "=";
+		var ca = document.cookie.split(';');
+		for (var i = 0; i < ca.length; i++) {
+			var c = ca[i];
+			while (c.charAt(0) == ' ') c = c.substring(1);
+			if (c.indexOf(name) != -1) return c.substring(name.length, c.length);
+		}
+		return "";
+	}
+
+	var u = navigator.userAgent;
+	var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+
+    getCookie("routeType")
+
+	window.onload = function () {
+		//页面与安卓或ios的交互
+		history.pushState(null, null, "#");
+		// ==================================
+	    var len = getCookie('historyLen');
+        if (len) {
+            var currentLen = history.length;
+            var oldLen = parseInt(len);
+            if (currentLen - oldLen === 2) {
+                clearCookie("routeType");
+            }
+        }
+        setCookie('historyLen', history.length)
+        // ==================================
+        window.addEventListener("popstate", function (e) {
+            if (getCookie("routeType") == "detail") {
+                clearCookie("routeType");
+                return false
+            }
+            if (isiOS) {
+                window.location.href = "winsion://interactive/back";
+            } else {
+                window.location.href = "winsion://interactive/finish";
+            }
+        }, false);
+	};
+
+</script>
+</body>
+</html>
