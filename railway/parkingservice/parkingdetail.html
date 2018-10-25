@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="css/around.css">
+</head>
+<body>
+<div class="mapPly">
+    <div class="item-box">
+        <div class="header-box" id="parkingLotInfo">
+
+        </div>
+        <!--------------点击跳转到车站导航------------------------>
+        <div class="goThere">
+            <a href="#" class="goThere-address" id="parkingGoto">
+                <img src="img/goPark.png" alt="">
+                <span class="goThereSpan">到这里</span>
+            </a>
+        </div>
+    </div>
+    <!-----------高德地图api--------------->
+    <div class="aMap">
+        <div id="tlbl-map"></div>
+    </div>
+</div>
+<script type="text/javascript" src="js/jquery-2.1.3.js"></script>
+<script src="js/jquery.cookie.js"></script>
+<script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.9&key=1d69b7e6bd28940bb32be0fd0f057e48"></script>
+<script type="text/javascript">
+    var detailInfo = $.cookie('detailInfo');
+    var parkingDetail = JSON.parse(detailInfo);
+    var URL = parkingDetail.imgUrl;
+    var address = parkingDetail.address;
+    var charge = parkingDetail.charge;
+    var name = parkingDetail.name;
+    var mobile = parkingDetail.mobile;
+    var latitude=parkingDetail.latitudeamap;
+    var longitude=parkingDetail.longitudeamap;
+
+    //价格判断
+        if(charge!==''){
+            charge='收费标准:'+charge
+        }
+
+    var autoHeight = $(window).height() - $("#header").height() - $("#parkingLotInfo").height() - $('.tlbl-goto').height();
+    $('#parkingLotInfo').append("<div class='img-box'><img src=" + URL + " alt='' class='img'></div><div class='info-box'><div><span class='name'>" + name + "</span></div><div class='addressDiv'><span class='addressSpan'>" + address + "</span></div></div>");
+    $('#parkingLotInfo .info-box').after("<p class='priceScale'><span>" + charge + "</span></p>");
+
+
+    // 检查经纬度数据
+
+    if (checkData(longitude, latitude)) {
+        $('#tlbl-map').css('height', autoHeight);
+        $('#parkingGoto').on('click', function () {
+            var goThere = 'winsion://route/journeyService/map?stationName='+ name + '&longitude=' + longitude + '&latitude=' +               latitude
+            window.location.href = goThere
+        });
+        $(document).ready(function () {
+            var AutoHeight = $(window).height() - $("#header").height() -$(".item-box").height() - $(".tlbl-goto").height() - 45;
+            $("#tlbl-map").css("height", AutoHeight);
+            shouMap()
+        });
+
+        function shouMap() {
+            // 高德地图API功能
+            //地图初始化时，在地图上添加一个marker标记,鼠标点击marker可弹出自定义的信息窗体
+            var map = new AMap.Map("tlbl-map", {
+                resizeEnable: true,
+                center: [longitude, latitude],
+                zoom: 16
+            });
+            addMarker();
+
+            //添加marker标记
+            function addMarker() {
+                map.clearMap();
+                var marker = new AMap.Marker({
+                    map: map,
+                    position:  [longitude, latitude]
+                });
+                //鼠标点击marker弹出自定义的信息窗体
+                AMap.event.addListener(marker, 'click', function () {
+                    infoWindow.open(map, marker.getPosition());
+                });
+            }
+
+            //实例化信息窗体
+            var title = name,
+                content = [];
+            content.push("地址:" + address);
+            content.push("电话:" + mobile);
+            var infoWindow = new AMap.InfoWindow({
+                isCustom: true,  //使用自定义窗体
+                content: createInfoWindow(title, content.join("<br/>")),
+                offset: new AMap.Pixel(16, -45)
+            });
+
+            //构建自定义信息窗体
+            function createInfoWindow(title, content) {
+                var info = document.createElement("div");
+                info.className = "info";
+
+                //可以通过下面的方式修改自定义窗体的宽高
+                //info.style.width = "400px";
+                // 定义顶部标题
+                var top = document.createElement("div");
+                var titleD = document.createElement("div");
+                var closeX = document.createElement("img");
+                top.className = "info-top";
+                titleD.innerHTML = title;
+                closeX.src = "https://webapi.amap.com/images/close2.gif";
+                closeX.onclick = closeInfoWindow;
+
+                top.appendChild(titleD);
+                top.appendChild(closeX);
+                info.appendChild(top);
+
+                // 定义中部内容
+                var middle = document.createElement("div");
+                middle.className = "info-middle";
+                middle.style.backgroundColor = 'white';
+                middle.innerHTML = content;
+                info.appendChild(middle);
+
+                // 定义底部内容
+                var bottom = document.createElement("div");
+                bottom.className = "info-bottom";
+                bottom.style.position = 'relative';
+                bottom.style.top = '0px';
+                bottom.style.margin = '0 auto';
+                var sharp = document.createElement("img");
+                sharp.src = "https://webapi.amap.com/images/sharp.png";
+                bottom.appendChild(sharp);
+                info.appendChild(bottom);
+                return info;
+            }
+
+            //关闭信息窗体
+            function closeInfoWindow() {
+                map.clearInfoWindow();
+            }
+
+        }
+
+    }else{
+        $('.goThere-address').css("display","none")
+    }
+
+    function checkData(lng, lat) {
+        return lng && lat && lng !== '0' && lat !== '0'
+    }
+
+</script>
+
+</body>
+</html>

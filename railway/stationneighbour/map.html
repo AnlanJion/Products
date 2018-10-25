@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+  <title>${stationNeighbourDto.getName()}</title>
+  <link rel="stylesheet" href="css/around.css">
+</head>
+<body>
+<div class="mapPly">
+  <div class="item-box">
+    <div class="header-box">
+      <div class="img-box">
+        <img src="img/marker.jpg" alt="">
+      </div>
+      <div class="info-box">
+        <div><span class="name">郑州金光大酒店</span></div>
+        <div>
+          <span class="price" id="address">￥298元起</span>
+        </div>
+        <!---------------新增加的地址--------------------->
+        <div class="addressDiv">
+        <span class="addressSpan">河南省郑州市二七区二马路86号河南省郑州市二七区二(火车站广场旁)</span>
+        </div>
+        </div>
+    </div>
+  <!--------------点击跳转到车站导航------------------------>
+    <div class="goThere">
+      <a href="" class="goThere-address">
+        <img src="img/goPark.png" alt="">
+        <span class="goThereSpan">到这里</span>
+      </a>
+    </div>
+
+</div>
+  <!-----------高德地图api--------------->
+  <div class="aMap">
+    <div id="tlbl-map"></div>
+  </div>
+</div>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.9&key=1d69b7e6bd28940bb32be0fd0f057e48"></script>
+<script type="text/javascript">
+  $(document).ready(function () {
+    var AutoHeight = $(window).height() - $("#header").height() - $(".item-box").height() - $(".tlbl-goto").height() - 45;
+    $("#tlbl-map").css("height", AutoHeight);
+    autoBrowser();
+  });
+  var browser = {
+      versions: function () {
+          var u = navigator.userAgent, app = navigator.appVersion;
+          return { //移动终端浏览器版本信息
+              ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+              android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或uc浏览器
+              iPhone: u.indexOf('iPhone') > -1, //是否为iPhone或者QQHD浏览器
+              iPad: u.indexOf('iPad') > -1, //是否iPad
+              wp: u.indexOf("Windows Phone") > -1, //是否windowsPhone
+              wxIphone: u.indexOf('MicroMessenger') > -1,
+              wxAndroid: u.indexOf('MicroMessenger') > -1
+
+          };
+      }(),
+  };
+  function autoBrowser() {
+    //ios判断浏览器
+    if (browser.versions.ios && browser.versions.wxIphone) {
+      shouMap();
+      return false;
+    }
+    ;
+
+    if (browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
+      shouMap();
+      return false;
+    }
+    ;
+
+    //判断安卓浏览器
+    if (browser.versions.android && browser.versions.wxIphone) {
+      shouMap();
+      return false;
+    }
+    ;
+
+
+    if (browser.versions.android) {
+      shouMap();
+      return false;
+    }
+    ;
+
+    if (browser.versions.wp) {
+      alert("暂不支持此设备");
+      return false;
+    }
+    ;
+  }
+
+  function shouMap() {
+      // 高德地图API功能
+      //地图初始化时，在地图上添加一个marker标记,鼠标点击marker可弹出自定义的信息窗体
+
+      var map = new AMap.Map("tlbl-map", {
+          resizeEnable: true,
+          center: [116.481181, 39.989792],
+          zoom: 16
+      });
+      addMarker();
+      //添加marker标记
+      function addMarker() {
+          map.clearMap();
+          var marker = new AMap.Marker({
+              map: map,
+              position: [116.481181, 39.989792]
+          });
+          //鼠标点击marker弹出自定义的信息窗体
+          AMap.event.addListener(marker, 'click', function() {
+              infoWindow.open(map, marker.getPosition());
+          });
+      }
+
+      //实例化信息窗体
+      var title = '方恒假日酒店',
+          content = [];
+      content.push("地址：北京市朝阳区阜通东大街6号院3号楼东北8.3公里");
+      content.push("电话：010-64733333");
+      var infoWindow = new AMap.InfoWindow({
+          isCustom: true,  //使用自定义窗体
+          content: createInfoWindow(title, content.join("<br/>")),
+          offset: new AMap.Pixel(16, -45)
+      });
+
+      //构建自定义信息窗体
+      function createInfoWindow(title, content) {
+          var info = document.createElement("div");
+          info.className = "info";
+
+          //可以通过下面的方式修改自定义窗体的宽高
+          //info.style.width = "400px";
+          // 定义顶部标题
+          var top = document.createElement("div");
+          var titleD = document.createElement("div");
+         var closeX = document.createElement("img");
+          top.className = "info-top";
+          titleD.innerHTML = title;
+          closeX.src = "https://webapi.amap.com/images/close2.gif";
+          closeX.onclick = closeInfoWindow;
+
+          top.appendChild(titleD);
+          top.appendChild(closeX);
+          info.appendChild(top);
+
+          // 定义中部内容
+          var middle = document.createElement("div");
+          middle.className = "info-middle";
+          middle.style.backgroundColor = 'white';
+          middle.innerHTML = content;
+          info.appendChild(middle);
+
+          // 定义底部内容
+          var bottom = document.createElement("div");
+          bottom.className = "info-bottom";
+          bottom.style.position = 'relative';
+          bottom.style.top = '0px';
+          bottom.style.margin = '0 auto';
+          var sharp = document.createElement("img");
+          sharp.src = "https://webapi.amap.com/images/sharp.png";
+          bottom.appendChild(sharp);
+          info.appendChild(bottom);
+          return info;
+      }
+
+      //关闭信息窗体
+      function closeInfoWindow() {
+          map.clearInfoWindow();
+      }
+
+
+
+  }
+
+  //判断是ios还是安卓
+  history.pushState(null, null, "#");
+  window.addEventListener("popstate", function (e) {
+      //获取当前url
+      // var url=window.location.href;
+       //var url=document.URl;
+      // if(url.indexOf("map")>=0){
+      //     window.location.href="./around.ftl"
+      // }
+
+      if (/(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent)) {
+          // window.location.href = "winsion://interactive/back";
+      } else if (/(Android)/i.test(navigator.userAgent)) {
+          // window.location.href = "winsion://interactive/finish";
+      }
+
+     // window.location.href="./around.html?" + Math.random()
+  });
+
+</script>
+</body>
+</html>
