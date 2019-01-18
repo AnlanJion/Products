@@ -199,7 +199,7 @@
   </div>
 </div>
 
-<script src="../parkingservice/js/jquery-2.1.3.js"></script>
+<script src="../../../俄罗斯方块/js/jquery-2.1.3.js"></script>
 <script src="../parkingservice/js/jquery.cookie.js"></script>
 <script type="text/javascript" src="https://api.map.baidu.com/api?v=2.0&ak=PfQ9N0aHmf9rw5hcuViCpQaG6CxYFVMs"></script>
 <script type="text/javascript">
